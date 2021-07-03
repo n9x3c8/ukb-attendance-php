@@ -156,7 +156,7 @@ class AttendanceModel extends DB {
 		$sql = " SELECT L.leave_id FROM leaves L, students S WHERE L.take_leave_date = '{$current_date}' AND L.subject_id = '{$subject_id}' AND L.student_id = S.student_id AND S.class_id = '{$class_id}' 
 		AND L.leave_id NOT IN ( SELECT LL.leave_id FROM list_leave LL WHERE LL.leave_date = '{$current_date}' AND LL.subject_id = '{$subject_id}' ); 
 		";
-		
+
 		$data = $this->get_data($sql);
 		if(count($data) !== 0) {
 			return ['state' => true];

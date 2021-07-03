@@ -3,8 +3,10 @@
 class Student extends Controller {
 
 	//lay ds sv đi học buổi hôm đó (trạng thai)
-	public function list_student($class_id = null, $subject_id = null, $current_date = null) {
+	public function list_student($username = null, $uuid = null, $class_id = null, $subject_id = null, $current_date = null) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			$this->verify($username, $uuid);
+
 			$student = $this->model('StudentModel');
 			$data = $student->get_list_student($class_id, $subject_id, $current_date);
 			exit( json_encode($data) );
@@ -12,8 +14,10 @@ class Student extends Controller {
 	}
 
 	//Gv đồng ý cho nghỉ
-	public function list_student_leave_permission_agree( $class_id = null, $subject_id = null, $current_date = null ) {
+	public function list_student_leave_permission_agree($username = null, $uuid = null, $class_id = null, $subject_id = null, $current_date = null ) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			$this->verify($username, $uuid);
+
 			$student = $this->model('StudentModel');
 			$data = $student->get_list_student_leave_permission_agree($class_id, $subject_id, $current_date);
 			echo json_encode($data);
@@ -22,8 +26,10 @@ class Student extends Controller {
 	}
 
 	//Gv từ chối cho nghỉ
-	public function list_student_leave_permission_denine( $class_id = null, $subject_id = null, $current_date = null ) {
+	public function list_student_leave_permission_denine($username = null, $uuid = null, $class_id = null, $subject_id = null, $current_date = null ) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			$this->verify($username, $uuid);
+
 			$student = $this->model('StudentModel');
 			$data = $student->get_list_student_leave_permission_denine($class_id, $subject_id, $current_date);
 			echo json_encode($data);
@@ -33,8 +39,10 @@ class Student extends Controller {
 	}
 
 	//nghỉ học không phép
-	public function list_student_without_permission( $class_id = null, $subject_id = null, $current_date = null ) {
+	public function list_student_without_permission($username = null, $uuid = null, $class_id = null, $subject_id = null, $current_date = null ) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			$this->verify($username, $uuid);
+
 			$student = $this->model('StudentModel');
 			$data = $student->get_list_student_without_permission($class_id, $subject_id, $current_date);
 			echo json_encode($data);
@@ -45,17 +53,19 @@ class Student extends Controller {
 
 	// lay ra so buoi nghi cua sinh viee
 
-	public function leave_session($student_id = null, $subject_id = null) {
-		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$student = $this->model('StudentModel');
-			$d = $student->get_leave_session($subject_id, $subject_id);
-			exit(json_encode($d));
-		}
-	}
+	// public function leave_session($student_id = null, $subject_id = null) {
+	// 	if($_SERVER['REQUEST_METHOD'] == 'GET') {
+	// 		$student = $this->model('StudentModel');
+	// 		$d = $student->get_leave_session($subject_id, $subject_id);
+	// 		exit(json_encode($d));
+	// 	}
+	// }
 
 	//ds đơn xin nghỉ của SV
-	public function leave_application($student_id = null, $current_date = null) {
+	public function leave_application($student_id = null, $uuid = null, $current_date = null) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			$this->verify($student_id, $uuid);
+
 			$student = $this->model('StudentModel');
 			$data = $student->get_leave_application($student_id, $current_date);
 			exit( json_encode($data) );
@@ -64,8 +74,10 @@ class Student extends Controller {
 	}
 
 
-	public function edit_take_leave() {
+	public function edit_take_leave($username = null, $uuid = null) {
 		if( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
+			$this->verify($username, $uuid);
+
 			$data = json_decode(file_get_contents('php://input'), true);
 			$leave_id = $data['leave_id'];
 			$leave_time = $data['leave_time'];
@@ -78,11 +90,25 @@ class Student extends Controller {
 		}
 	}
 
-	public function remove_take_leave($leave_id = null) {
+	public function remove_take_leave($username = null, $uuid = null, $leave_id = null) {
 		if($_SERVER['REQUEST_METHOD']  == 'GET') {
+			$this->verify($username, $uuid);
+			
 			$student = $this->model('StudentModel');
 			$data = $student->delete_take_leave($leave_id);
 			exit( json_encode($data) );
+		}
+	}
+
+	private function verify($username = null, $uuid = null) {
+		$verify = $this->model('VerifyModel');
+		$data = $verify->get_key_security($username);
+		if(!$data) {
+			exit(json_encode(['state' => -403]));
+		}
+		
+		if($data['id'] !== $username || $data['uuid'] !== $uuid) {
+			exit(json_encode(['state' => -403]));
 		}
 	}
 

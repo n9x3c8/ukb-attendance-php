@@ -10,7 +10,6 @@ class Account extends Controller {
 		$this->id = null;
 	}
 
-	public function index() {}
 
 	public function login() {
 		$data = json_decode(file_get_contents('php://input'), true);
@@ -49,14 +48,13 @@ class Account extends Controller {
 	}
 
 	//Student
-	public function info_details_student($account_id) {
+	public function info_details_student($account_id, $uuid = null) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			$this->verify($account_id, $uuid);
+
 			$account = $this->model('AccountModel');
-			if($account_id) {
-				$info = $account->get_info_details_student($account_id);
-				exit( json_encode($info) );
-			}
-			exit( json_encode(['state' => -1]) );
+			$info = $account->get_info_details_student($account_id);
+			exit( json_encode($info) );
 		}
 	}
 
@@ -95,15 +93,13 @@ class Account extends Controller {
 
 
 
-	public function info_details_teacher($teacher_id) {
+	public function info_details_teacher($teacher_id, $uuid = null) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			if($teacher_id !== null) {
-				$account = $this->model('AccountModel');
-				$info = $account->get_info_details_teacher($teacher_id);
-				echo count($info) !== 0 ? json_encode($info) : json_encode(['state' => -1]);
-				exit();
-			}
-			exit(json_encode(['state' => -1]));
+			$this->verify($teacher_id, $uuid);			
+			
+			$account = $this->model('AccountModel');
+			$info = $account->get_info_details_teacher($teacher_id);
+			echo count($info) !== 0 ? json_encode($info) : json_encode(['state' => -1]);
 		}
 	}
 
@@ -217,5 +213,16 @@ class Account extends Controller {
 		exit(json_encode($data));
 	}
 
+	private function verify($username = null, $uuid = null) {
+		$verify = $this->model('VerifyModel');
+		$data = $verify->get_key_security($username);
+		if(!$data) {
+			exit(json_encode(['state' => -403]));
+		}
+		
+		if($data['id'] !== $username && $data['uuid'] !== $uuid) {
+			exit(json_encode(['state' => -403]));
+		}
+	}
 
 }

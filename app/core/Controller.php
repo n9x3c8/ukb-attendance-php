@@ -9,7 +9,6 @@ class Controller
 
 	protected function view($view, $data = [])
 	{
-		// ..//app/views/home/index.php
 		require_once "../app/views/{$view}.php";
 	}
 }

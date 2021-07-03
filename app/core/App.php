@@ -5,8 +5,6 @@ class App
 	protected $method = 'index';
 	protected $params = [];
 
-
-
 	public function __construct()
 	{
 		$url = $this->parseUrl();
