@@ -61,7 +61,7 @@ class StateModel extends DB {
 
 
 		// lay thong tin mon hoc va lop hoc
-		$sql = " SELECT C.class_id, C.class_name, S.subject_id, S.subject_name, TIME_FORMAT( attendance_time, '%H' ) timeServer, A.attendance_id, DATE_FORMAT(A.attendance_time, '%Y%m%d') date_server ";
+		$sql = " SELECT C.class_id, C.class_name, S.subject_id, S.subject_name, TIME_FORMAT( attendance_time, '%H' ) timeServer, A.attendance_id, A.radius, DATE_FORMAT(A.attendance_time, '%Y%m%d') date_server ";
 		$sql .= " FROM class C, subjects S, attendances A  ";
 		$sql .= " WHERE C.class_id = A.class_id AND S.subject_id = A.subject_id ";
 		$sql .= " AND A.teacher_id = '{$teacher_id}'  ";
@@ -85,6 +85,7 @@ class StateModel extends DB {
 
 		if(count($data) !== 0) {
 			$time = (int)$data[0]['timeServer'];
+			$radius = +$data[0]['radius'];
 			$date_server = $data[0]['date_server'];
 			$attendance_id_last = (int)$data[0]['attendance_id'];
 			$infoSubject = [
@@ -101,6 +102,7 @@ class StateModel extends DB {
 
 		$data = [
 			'count_number_session' => $count,
+			'radius' => $radius ?? 5,
 			'timeserver' => $time,
 			'dateServer' => $date_server,
 			'attendance_id_last' => $attendance_id_last,

@@ -30,6 +30,7 @@ class Account extends Controller {
 			$permission_id = $info_user['permission_id'];
 			if($key_security === NULL) {
 				$update = $account->update_key_security($this->username, $uuid);
+				$key_security = $uuid;
 			}
 
 			// xac thuc
@@ -64,7 +65,7 @@ class Account extends Controller {
 		if($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$id = $_POST['student_id'];
 			$permission_id = $_POST['permission_id'];
-			$name = $_POST['student_name'];
+			$birthday = $_POST['student_birthday'];
 			$address = $_POST['student_address'];
 			$email = $_POST['student_email'];
 			$phone = $_POST['student_numphone'];
@@ -73,8 +74,11 @@ class Account extends Controller {
 			$upload_avatar = $this->upload_avatar($avatar, $permission_id);
 			$upload_state_avatar = $upload_avatar['state'] === 'upload_success' ? 1 : $upload_avatar['state'];
 
+			// echo json_encode($upload_state_avatar);
+			// exit();
+
 			$account = $this->model('AccountModel');
-			$update_state = $account->update_info_details_student($id, $name, $address, $email, $phone);
+			$update_state = $account->update_info_details_student($id, $birthday, $address, $email, $phone);
 
 			$update_state_info = $update_state ? 1 : -1;
 
@@ -88,9 +92,6 @@ class Account extends Controller {
 		}
 
 	}
-
-
-
 
 
 	public function info_details_teacher($teacher_id, $uuid = null) {
@@ -130,7 +131,6 @@ class Account extends Controller {
 			$username = $_POST[$user_id];
 		}
 
-
 		if( !isset($_FILES['image']) ) {
 			return ['state' => 'file_not_found'];
 			exit();
@@ -150,13 +150,15 @@ class Account extends Controller {
 			return ['state' => 'file_is_too_large'];
 		}
 
-
 		// kiem tra file ton tai
 		$file = '../public/images/' . $avatar;
 		$is_exist = file_exists($file);
 
 		if($is_exist) {
-			unlink($file);
+			$del_success = unlink($file);
+			if(!$del_success) {
+				exit(json_encode(['state' => 'Xoa that bai!']));
+			}
 		}
 
 		$uniqid = uniqid($username . '-', false);
@@ -220,7 +222,8 @@ class Account extends Controller {
 			exit(json_encode(['state' => -403]));
 		}
 		
-		if($data['id'] !== $username && $data['uuid'] !== $uuid) {
+		if($data['id'] !== $username || $data['uuid'] !== $uuid) {
+			http_response_code(403);
 			exit(json_encode(['state' => -403]));
 		}
 	}

@@ -171,12 +171,19 @@ class StudentModel extends DB {
 
 
 	public function update_take_leave ($leave_id, $leave_time, $leave_reason, $take_leave_date) {
-		$sql = " UPDATE leaves SET leave_time = '{$leave_time}', leave_reason = '{$leave_reason}', take_leave_date = '{$take_leave_date}' WHERE leave_id = {$leave_id}; ";
-
 		$this->connect();
+		$leave__id = $this->_connection->real_escape_string($leave_id);
+		$leave__time = $this->_connection->real_escape_string($leave_time);
+		$leave__reason = $this->_connection->real_escape_string($leave_reason);
+		$take_leave_date2 = $this->_connection->real_escape_string($take_leave_date);
+
+
+		$sql = " UPDATE leaves SET leave_time = '{$leave__time}', leave_reason = '{$leave__reason}', take_leave_date = '{$take_leave_date2}' WHERE leave_id = {$leave__id}; ";
+
 		$result = $this->_connection->query($sql);
-		if($result) return ['state' => 1];
-		return ['state' => -1];
+		// if($result) return ['state' => 1];
+		// return ['state' => -1];
+		return $result ? ['state' => 1] : ['state' => -1];
 	}
 
 

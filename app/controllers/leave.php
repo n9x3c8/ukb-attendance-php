@@ -152,9 +152,9 @@ class Leave extends Controller {
 	}
 
 	//GV cap nhap trong chi tiet buoi hoc (SV nghi khong phep)
-	public function rm_without_leave($student_id = null, $uuid = null, $subject_id = null, $current_date = null) {
+	public function rm_without_leave($student_id = null, $uuid = null, $subject_id = null, $current_date = null, $username) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$this->verify($student_id, $uuid);
+			$this->verify($username, $uuid);
 			
 			$leave = $this->model('LeaveModel');
 			$data = $leave->delete_rm_without_leave($student_id, $subject_id, $current_date);

@@ -20,7 +20,7 @@ class ClassRoom extends Controller {
 			exit(json_encode(['state' => -403]));
 		}
 		
-		if($data['id'] !== $username && $data['uuid'] !== $uuid) {
+		if($data['id'] !== $username || $data['uuid'] !== $uuid) {
 			exit(json_encode(['state' => -403]));
 		}
 	}

@@ -6,12 +6,14 @@ class Statistical extends Controller {
 		echo "statiscal";
 	}
 
+	// public function teach_detail($teacher_id = null, $uuid = null, $current_year = null) {
 	public function teach_detail($teacher_id = null, $uuid = null, $current_year = null) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
 			$this->verify($teacher_id, $uuid);
 
 			$statistical = $this->model('StatisticalModel');
-			$data = $statistical->get_teach_detail($teacher_id, $current_year);
+			// $data = $statistical->get_teach_detail($teacher_id, $current_year);
+			$data = $statistical->get_teach_detail($teacher_id);
 			exit( json_encode($data) );
 		}
 	}
@@ -40,7 +42,7 @@ class Statistical extends Controller {
 	// lay ra danh sach nghi cua sinh vien | chuc nang thong ke
 	public function list_leave_date($student_id = null, $uuid = null, $subject_id = null, $current_date = null) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$this->verify($username, $uuid);
+			$this->verify($student_id, $uuid);
 			
 			$statistical = $this->model('StatisticalModel');
 			$data = $statistical->get_list_leave_date($student_id, $subject_id, $current_date);

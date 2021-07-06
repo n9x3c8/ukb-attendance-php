@@ -1,7 +1,9 @@
 <?php 
 class AccountModel extends DB {
 
-	public function get_password_by_username($username) {
+	public function get_password_by_username($id) {
+		$this->connect();
+		$username = $this->_connection->real_escape_string($id);
 		$sql = "SELECT user_password AS password, key_security, UP.permission_id FROM users AS U, user_permission AS UP
 		WHERE U.user_id = '{$username}'
 		AND
@@ -15,8 +17,11 @@ class AccountModel extends DB {
 		return -1;
 	}
 
-	public function update_key_security($username, $key) {
-		$sql = "UPDATE users SET key_security = '{$key}' WHERE user_id = '{$username}'; ";
+	public function update_key_security($id, $key) {
+		$this->connect();
+		$username = $this->_connection->real_escape_string($id);
+		$key_security = $this->_connection->real_escape_string($key);
+		$sql = "UPDATE users SET key_security = '{$key_security}' WHERE user_id = '{$username}'; ";
 		return$this->_connection->query($sql);
 	}
 
@@ -33,33 +38,51 @@ class AccountModel extends DB {
 
 	//Student
 	public function get_info_details_student($student_id = '') {
-		$sql = "SELECT * FROM students WHERE student_id = '{$student_id}'; ";
+		$this->connect();
+		$id = $this->_connection->real_escape_string($student_id);
+		$sql = "SELECT * FROM students WHERE student_id = '{$id}'; ";
 		return $this->get_data($sql);
 	}
 
-	public function update_info_details_student($id, $name, $address, $email, $phone) {
-		$sql = "UPDATE students ";
-		$sql .= " SET student_address = '{$address}', student_email = '{$email}', student_numphone = '{$phone}' ";
-		$sql .= " WHERE student_id = '{$id}'; ";	
+	public function update_info_details_student($id, $birthday, $address, $email, $phone) {
 		$this->connect();
+		$student_id = $this->_connection->real_escape_string($id);
+		$student_birthday = $this->_connection->real_escape_string($birthday);
+		$student_address = $this->_connection->real_escape_string($address);
+		$student_email = $this->_connection->real_escape_string($email);
+		$student_phone = $this->_connection->real_escape_string($phone);
+
+		$sql = "UPDATE students ";
+		$sql .= " SET student_address = '{$student_address}', student_email = '{$student_email}', student_numphone = '{$student_phone}', student_birthday = {$student_birthday} ";
+		$sql .= " WHERE student_id = '{$student_id}'; ";
 		return $this->_connection->query($sql);
 	}
 
 
 	// Teacher
 	public function get_info_details_teacher($teacher_id) {
+		$this->connect();
+		$username = $this->_connection->real_escape_string($teacher_id);
 		$sql = "SELECT * FROM teachers WHERE teacher_id = '{$teacher_id}';";
 		return $this->get_data($sql);
 	}
 
 	public function update_info_details_teacher($teacher_id, $address, $phone, $email) {
-		$sql = "UPDATE teachers SET teacher_address = '{$address}', teacher_numphone = '{$phone}', teacher_email = '{$email}'  WHERE teacher_id = '{$teacher_id}'; ";
 		$this->connect();
+		$username = $this->_connection->real_escape_string($teacher_id);
+		$teacher_address = $this->_connection->real_escape_string($address);
+		$teacher_phone = $this->_connection->real_escape_string($phone);
+		$teacher_mail = $this->_connection->real_escape_string($email);
+		
+		$sql = "UPDATE teachers SET teacher_address = '{$teacher_address}', teacher_numphone = '{$teacher_phone}', teacher_email = '{$teacher_mail}'  WHERE teacher_id = '{$username}'; ";
 		return $this->_connection->query($sql);
 	}
 
 
-	public function get_avatar_user($username, $array_info) {
+	public function get_avatar_user($id, $array_info) {
+		$this->connect();
+		$username = $this->_connection->real_escape_string($id);
+
 		$avatar_name = null;
 
 		$table_name = $array_info[0];

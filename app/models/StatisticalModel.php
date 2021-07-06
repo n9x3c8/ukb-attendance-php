@@ -2,7 +2,8 @@
 
 class StatisticalModel extends DB {
 
-	public function get_teach_detail($teacher_id, $current_year) {
+	// public function get_teach_detail($teacher_id, $current_year) {
+	public function get_teach_detail($teacher_id) {
 		$sql = " SELECT B1.teacher_id, B1.class_id, B1.class_name, B1.subject_id, B1.subject_name, B1.subject_credit, B2.learn_session, B2.month, B2.year
 		FROM
 		(SELECT TD.teacher_id, C.class_id, C.class_name, SB.subject_id, SB.subject_name, SB.subject_credit
@@ -58,10 +59,51 @@ class StatisticalModel extends DB {
 
 	}
 
+	// public function get_list_student_statistical($class_id, $subject_id, $current_date) {
+	// 	$sql = "SELECT T1.student_id, T1.student_name, T1.student_birthday, T2.count
+	// 	FROM (
+	// 	SELECT S.student_id , S.student_name, S.student_birthday 
+	// 	FROM students S 
+	// 	WHERE S.class_id = '{$class_id}') T1
+	// 	LEFT JOIN(
+	// 	SELECT LL.student_id, COUNT(LL.list_leave_id) count
+	// 	FROM list_leave LL, students S 
+	// 	WHERE LL.subject_id = '{$subject_id}'
+	// 	AND LL.leave_date <= '{$current_date}'
+	// 	AND LL.student_id = S.student_id
+	// 	AND S.class_id = '{$class_id}'
+	// 	GROUP BY LL.student_id, LL.subject_id) T2
+	// 	ON T1.student_id = T2.student_id; ";
+
+
+	// 	$data = $this->get_data($sql);
+	// 	if(count($data) !== 0) {
+	// 		return $data;
+	// 	}
+	// 	return [];
+	// }
+
 	public function get_list_student_statistical($class_id, $subject_id, $current_date) {
-		$sql = "SELECT T1.student_id, T1.student_name, T1.student_birthday, T2.count
+		$current_page = $_GET['p'] ?? 1;
+		$length = $_GET['length'] ?? 10;
+
+		$sql = "SELECT COUNT(student_id) AS count FROM students
+		WHERE class_id = '{$class_id}'; ";
+
+		$data = $this->get_data($sql);
+
+		if(count($data) === 0) {
+			return [];
+			exit();
+		}
+
+		$count = +$data[0]['count'];
+		$total_page = ceil($count / $length);
+		$offset = ($current_page - 1) * $length;
+
+		$sql = "SELECT T1.student_id, T1.student_name, T1.student_gender, T1.student_birthday, T2.count, T1.student_avatar
 		FROM (
-		SELECT S.student_id , S.student_name, S.student_birthday 
+		SELECT S.student_id , S.student_name, S.student_birthday, S.student_gender, S.student_avatar 
 		FROM students S 
 		WHERE S.class_id = '{$class_id}') T1
 		LEFT JOIN(
@@ -72,15 +114,21 @@ class StatisticalModel extends DB {
 		AND LL.student_id = S.student_id
 		AND S.class_id = '{$class_id}'
 		GROUP BY LL.student_id, LL.subject_id) T2
-		ON T1.student_id = T2.student_id; ";
+		ON T1.student_id = T2.student_id LIMIT {$length} OFFSET {$offset} ; ";
 
 
 		$data = $this->get_data($sql);
+
 		if(count($data) !== 0) {
-			return $data;
+			return [
+				'total_page' => $total_page,
+				'data' => $data
+			];
+
 		}
 		return [];
 	}
+
 
 	public function get_list_leave_date($student_id, $subject_id, $current_date) {
 		$sql = "SELECT LL.leave_date, LL.leave_reason, LL.is_enable
