@@ -131,7 +131,7 @@ class StatisticalModel extends DB {
 
 
 	public function get_list_leave_date($student_id, $subject_id, $current_date) {
-		$sql = "SELECT LL.leave_date, LL.leave_reason, LL.is_enable
+		$sql = "SELECT LL.student_id, LL.leave_date, LL.leave_reason, LL.is_enable
 		FROM list_leave LL
 		WHERE LL.student_id = '{$student_id}'
 		AND LL.subject_id = '{$subject_id}'

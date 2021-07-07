@@ -12,54 +12,17 @@ class Student extends Controller {
 			exit( json_encode($data) );
 		}
 	}
+	
 
-	//Gv đồng ý cho nghỉ
-	public function list_student_leave_permission_agree($username = null, $uuid = null, $class_id = null, $subject_id = null, $current_date = null ) {
+	public function get_list_student_by_options($username = null, $uuid = null, $class_id = null, $subject_id = null, $current_date = null, $is_enable = null, $leave_denine = null) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
 			$this->verify($username, $uuid);
-
 			$student = $this->model('StudentModel');
-			$data = $student->get_list_student_leave_permission_agree($class_id, $subject_id, $current_date);
-			echo json_encode($data);
-			exit();
+			$data = $student->get_list_student_by_options($class_id, $subject_id, $current_date, $is_enable, $leave_denine);
+			exit(json_encode($data));
 		}
 	}
 
-	//Gv từ chối cho nghỉ
-	public function list_student_leave_permission_denine($username = null, $uuid = null, $class_id = null, $subject_id = null, $current_date = null ) {
-		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$this->verify($username, $uuid);
-
-			$student = $this->model('StudentModel');
-			$data = $student->get_list_student_leave_permission_denine($class_id, $subject_id, $current_date);
-			echo json_encode($data);
-			exit();
-
-		}
-	}
-
-	//nghỉ học không phép
-	public function list_student_without_permission($username = null, $uuid = null, $class_id = null, $subject_id = null, $current_date = null ) {
-		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$this->verify($username, $uuid);
-
-			$student = $this->model('StudentModel');
-			$data = $student->get_list_student_without_permission($class_id, $subject_id, $current_date);
-			echo json_encode($data);
-			exit();
-		}
-	}
-
-
-	// lay ra so buoi nghi cua sinh viee
-
-	// public function leave_session($student_id = null, $subject_id = null) {
-	// 	if($_SERVER['REQUEST_METHOD'] == 'GET') {
-	// 		$student = $this->model('StudentModel');
-	// 		$d = $student->get_leave_session($subject_id, $subject_id);
-	// 		exit(json_encode($d));
-	// 	}
-	// }
 
 	//ds đơn xin nghỉ của SV
 	public function leave_application($student_id = null, $uuid = null, $current_date = null) {

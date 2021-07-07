@@ -40,9 +40,9 @@ class Statistical extends Controller {
 
 
 	// lay ra danh sach nghi cua sinh vien | chuc nang thong ke
-	public function list_leave_date($student_id = null, $uuid = null, $subject_id = null, $current_date = null) {
+	public function list_leave_date($teacher_id = null, $student_id = null, $uuid = null, $subject_id = null, $current_date = null) {
 		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$this->verify($student_id, $uuid);
+			$this->verify($teacher_id, $uuid);
 			
 			$statistical = $this->model('StatisticalModel');
 			$data = $statistical->get_list_leave_date($student_id, $subject_id, $current_date);

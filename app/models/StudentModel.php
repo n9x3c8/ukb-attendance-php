@@ -2,27 +2,6 @@
 
 class StudentModel extends DB {
 
-	// public function get_list_student($class_id, $subject_id, $current_date) {
-	// 	$sql = " SELECT L1.student_id, L1.student_name, L1.state, L2.leave_session FROM (SELECT DISTINCT S.student_id student_id, S.student_name,
-	// 	CASE WHEN LL.is_enable = 0 OR LL.is_enable = 1 THEN 0 ELSE 1 END state
-	// 	FROM students S
-	// 	LEFT JOIN  ( SELECT LL.student_id student_id, LL.is_enable is_enable FROM list_leave LL WHERE LL.subject_id = '{$subject_id}' AND leave_date = '{$current_date}' ) LL
-	// 	ON LL.student_id = S.student_id
-	// 	WHERE S.class_id = '{$class_id}'  ) AS L1
-	// 	LEFT JOIN ( SELECT LL.student_id, COUNT(LL.list_leave_id) leave_session
-	// 	FROM list_leave LL
-	// 	WHERE LL.subject_id = '{$subject_id}'
-	// 	GROUP BY student_id ) L2
-	// 	ON L1.student_id = L2.student_id;
-	// 	";
-
-	// 	$data = $this->get_data($sql);
-	// 	if(count($data) !== 0) {
-	// 		return $data;
-	// 	}
-	// 	return [];
-	// }
-
 	public function get_list_student($class_id, $subject_id, $current_date) {
 		$length = $_GET['length'] ?? 10;
 		$current_page = $_GET['p'] ?? 1;
@@ -54,80 +33,20 @@ class StudentModel extends DB {
 	}
 
 
-	
-
-	// public function get_list_student_leave_permission_agree($class_id, $subject_id, $current_date) {
-	// 	$sql = " SELECT S.student_id, S.student_name, LL.leave_reason, LL.take_leave_date
-	// 	FROM ( SELECT student_id, student_name FROM students WHERE class_id = '{$class_id}' ) S
-	// 	INNER JOIN (SELECT L1.student_id, L1.leave_reason, L1.denine_reason, DATE_FORMAT(L2.leave_time, '%d-%m-%Y') take_leave_date FROM list_leave L1, leaves L2 WHERE L1.subject_id = '{$subject_id}' AND L1.is_enable = 1 AND L1.leave_date = '{$current_date}' AND L1.leave_reason IS NOT NULL AND L1.leave_id = L2.leave_id   ) LL
-	// 	ON LL.student_id  = S.student_id;  ";
-
-	// 	$data = $this->get_data($sql);
-
-	// 	if(count($data) !== 0) {
-	// 		return $data;
-	// 	}
-	// 	return [];
-	// }
-
-	public function get_list_student_leave_permission_agree($class_id, $subject_id, $current_date) {
-		$sql = "SELECT L1.student_id, L1.leave_reason, DATE_FORMAT(L2.leave_time, '%d-%m-%Y') take_leave_date, S.student_name 
-		FROM list_leave L1, leaves L2 , students S 
-		WHERE L1.leave_date = '{$current_date}' AND L1.subject_id = '{$subject_id}' AND L1.is_enable = 1 
-		AND  L1.leave_reason IS NOT NULL AND L1.leave_id = L2.leave_id
+	public function get_list_student_by_options($class_id, $subject_id, $current_date, $is_enable, $leave_denine) {
+		$sql = "SELECT L1.student_id, S.student_name
+		FROM list_leave L1, students S 
+		WHERE L1.leave_date = '{$current_date}' AND L1.subject_id = '{$subject_id}' AND L1.is_enable = {$is_enable} 
+		AND  L1.denine_reason IS {$leave_denine} NULL 
 		AND L1.student_id = S.student_id
-		AND S.class_id = '{$class_id}' ; ";
-
-		$data = $this->get_data($sql);
-
-		if(count($data) !== 0) {
-			return $data;
-		}
-		return [];
-	}
-
-
-	// public function get_list_student_leave_permission_denine($class_id, $subject_id, $current_date) {
-	// 	$sql = " SELECT S.student_id, S.student_name, LL.leave_reason, LL.denine_reason,  LL.take_leave_date
-	// 	FROM ( SELECT student_id, student_name FROM students WHERE class_id = '{$class_id}' ) S
-	// 	INNER JOIN ( SELECT L1.student_id, L1.leave_reason, L1.denine_reason, DATE_FORMAT(L2.leave_time, '%d-%m-%Y') take_leave_date FROM list_leave L1, leaves L2 WHERE L1.subject_id = '{$subject_id}' AND L1.is_enable = 0 AND L1.leave_date = '{$current_date}' AND L1.leave_reason IS NOT NULL AND L1.leave_id = L2.leave_id) LL
-	// 	ON LL.student_id  = S.student_id; ";
-
-	// 	$data = $this->get_data($sql);
-
-	// 	if(count($data) !== 0) {
-	// 		return $data;
-	// 	}
-	// 	return [];
-	// }
-
-	public function get_list_student_leave_permission_denine($class_id, $subject_id, $current_date) {
-		$sql = "SELECT L1.student_id, L1.leave_reason, DATE_FORMAT(L2.leave_time, '%d-%m-%Y') take_leave_date, S.student_name, L1.denine_reason 
-		FROM list_leave L1, leaves L2 , students S 
-		WHERE L1.leave_date = '{$current_date}' AND L1.subject_id = '{$subject_id}' AND L1.is_enable = 0 
-		AND  L1.leave_reason IS NOT NULL AND L1.leave_id = L2.leave_id
-		AND L1.student_id = S.student_id
-		AND S.class_id = '{$class_id}' ; ";
-
-		$data = $this->get_data($sql);
-
-		if(count($data) !== 0) {
-			return $data;
-		}
-		return [];
-	}
-
-
-	public function get_list_student_without_permission($class_id, $subject_id, $current_date) {
-		$sql = " SELECT S.student_id, S.student_name, LL.leave_reason, LL.denine_reason
-		FROM ( SELECT student_id, student_name FROM students WHERE class_id = '{$class_id}' ) S
-		INNER JOIN ( SELECT student_id, leave_reason, denine_reason FROM list_leave WHERE subject_id = '{$subject_id}' AND is_enable = 0 AND leave_date = '{$current_date}'  AND denine_reason IS NULL) LL
-		ON LL.student_id  = S.student_id; ";
+		AND S.class_id = '{$class_id}'; ";
+		
 		$data = $this->get_data($sql);
 		if(count($data) !== 0) {
 			return $data;
 		}
 		return [];
+
 	}
 
 
