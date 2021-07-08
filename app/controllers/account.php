@@ -19,13 +19,21 @@ class Account extends Controller {
 			$this->username = $data['username'];
 			$this->password = $data['password'];
 
-
 			$info_user = $account->get_password_by_username($this->username);
 			if($info_user === -1) {
 				exit(json_encode(['state' => -1])); // -1 ko ton tai tai khoan
 			}
 
 			$hash = $info_user['password'];
+
+			// xac thuc
+			$is_verify_password = password_verify($this->password, $hash);
+
+			if(!$is_verify_password) {
+				exit(json_encode(['state' => -2]));
+			}
+
+			
 			$key_security = $info_user['key_security'];
 			$permission_id = $info_user['permission_id'];
 			if($key_security === NULL) {
@@ -33,14 +41,7 @@ class Account extends Controller {
 				$key_security = $uuid;
 			}
 
-			// xac thuc
-			$is_verify_password = password_verify($this->password, $hash);
 			$cond_device_id = $uuid === $key_security;
-
-			if(!$is_verify_password) {
-				exit(json_encode(['state' => -2]));
-			}
-
 			if(!$cond_device_id) {
 				exit(json_encode(['state' => -3]));
 			}

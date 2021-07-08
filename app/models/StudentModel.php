@@ -12,7 +12,7 @@ class StudentModel extends DB {
 		$total_page = ceil($count / $length);
 		$offset = ($current_page - 1) * $length;
 
-		$sql = " SELECT S.student_id student_id, S.student_name,
+		$sql = " SELECT S.student_id, S.student_name, S.student_avatar, S.student_gender,
 		CASE WHEN LL.is_enable = 0 OR LL.is_enable = 1 THEN 0 ELSE 1 END state
 		FROM students S
 		LEFT JOIN  ( SELECT LL.student_id student_id, LL.is_enable is_enable FROM list_leave LL 

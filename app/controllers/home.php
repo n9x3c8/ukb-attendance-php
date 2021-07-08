@@ -1,9 +1,7 @@
 <?php
 class Home  extends Controller{
 	public function index() {
-		$pw = 'matkhau';
+		$pw = 'password123';
 		echo $hash = password_hash($pw, PASSWORD_DEFAULT);
-		$verify = password_verify('matkhau', $hash);
-		// echo $verify;
 	}
 }
