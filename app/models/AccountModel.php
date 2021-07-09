@@ -26,17 +26,6 @@ class AccountModel extends DB {
 	}
 
 
-	// public function get_user_id($username, $password) {
-	// 	$sql = " SELECT UP.permission_id FROM users AS U, user_permission AS UP ";
-	// 	$sql .= " WHERE U.user_id = UP.user_id AND UP.user_id = '{$username}' AND U.user_password = '{$password}' LIMIT 1; ";
-	// 	// $sql = " CALL log_in( '{$username}', '{$password}' ) ";
-	// 	$result = $this->get_data($sql);
-
-	// 	return count($result) === 1 ? $result[0]['permission_id'] : -1;
-	// }
-
-
-	//Student
 	public function get_info_details_student($student_id = '') {
 		$this->connect();
 		$id = $this->_connection->real_escape_string($student_id);
@@ -44,18 +33,9 @@ class AccountModel extends DB {
 		return $this->get_data($sql);
 	}
 
-	public function update_info_details_student($id, $birthday, $address, $email, $phone) {
-		$this->connect();
-		$student_id = $this->_connection->real_escape_string($id);
-		$student_birthday = $this->_connection->real_escape_string($birthday);
-		$student_address = $this->_connection->real_escape_string($address);
-		$student_email = $this->_connection->real_escape_string($email);
-		$student_phone = $this->_connection->real_escape_string($phone);
 
-		$sql = "UPDATE students ";
-		$sql .= " SET student_address = '{$student_address}', student_email = '{$student_email}', student_numphone = '{$student_phone}', student_birthday = {$student_birthday} ";
-		$sql .= " WHERE student_id = '{$student_id}'; ";
-		return $this->_connection->query($sql);
+	public function update_info_details($name_table, $info, $where) {
+		return $this->update($name_table, $info, $where);
 	}
 
 

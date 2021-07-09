@@ -61,31 +61,49 @@ class Account extends Controller {
 	}
 
 
-
-	public function update_profile_student() {
+	public function update_profile() {
 		if($_SERVER['REQUEST_METHOD'] == 'POST') {
-			$id = $_POST['student_id'];
-			$permission_id = $_POST['permission_id'];
-			$birthday = $_POST['student_birthday'];
-			$address = $_POST['student_address'];
-			$email = $_POST['student_email'];
-			$phone = $_POST['student_numphone'];
-			$avatar = $_POST['student_avatar'];
+			$info = null;
+			$table = null;
+			$column_id = null;
 
-			$upload_avatar = $this->upload_avatar($avatar, $permission_id);
-			$upload_state_avatar = $upload_avatar['state'] === 'upload_success' ? 1 : $upload_avatar['state'];
-
-			// echo json_encode($upload_state_avatar);
-			// exit();
-
+			$id = $_POST['id'];
+			$permission_id = $_POST['permission'];
+			$gender = $_POST['gender'];
+			$birthday = $_POST['birthday'];
+			$address = $_POST['address'];
+			$phone = $_POST['phone'];
+			$email = $_POST['email'];
 			$account = $this->model('AccountModel');
-			$update_state = $account->update_info_details_student($id, $birthday, $address, $email, $phone);
+
+			if(+$permission_id === 1) {
+				$table = 'students';
+				$column_id = 'student_id';
+				$info = [
+					'student_gender' => +$gender,
+					'student_birthday' => $birthday,
+					'student_address' => $address,
+					'student_numphone' => $phone,
+					'student_email' => $email,
+				];
+			} elseif(+$permission_id === 2) {
+				$table = 'teachers';
+				$column_id = 'teacher_id';
+				$info = [
+					'teacher_gender' => $gender,
+					'teacher_birthday' => $birthday,
+					'teacher_address' => $address,
+					'teacher_numphone' => $phone,
+					'teacher_email' => $email,
+				];
+			}
+
+			$where = " {$column_id} = '{$id}' ";
+			$update_state = $account->update_info_details($table, $info, $where);
 
 			$update_state_info = $update_state ? 1 : -1;
 
 			$info = [
-				'avatar_new' => $upload_avatar['filename'] ?? '',
-				'upload_state_avatar' => $upload_state_avatar,
 				'update_state_info' => $update_state_info
 			];
 
@@ -105,36 +123,24 @@ class Account extends Controller {
 		}
 	}
 
-	public function update_profile_teacher() {
-		$data = json_decode(file_get_contents('php://input'), true);
-		if($_SERVER['REQUEST_METHOD'] == 'POST') {
-			if($data !== null) {
-				$account = $this->model('AccountModel');
-				$id = $data['id'];
-				$address = $data['address'];
-				$phone = $data['phone'];
-				$email = $data['email'];
-				echo $account->update_info_details_teacher($id, $address, $phone, $email) ? json_encode(['state' => 1]) : json_encode(['state' => -1]);
-				exit();
-			}
-			exit( json_encode(['state' => -1]) );
-		}
-	}
 
-	// permission_id = 1 || 2
-	private function upload_avatar($avatar, $permission_id) {
-		$username = null;
-		$array_info = null;
-		
-		$user_id = $permission_id == 1 ? 'student_id' : 'teacher_id';
-		
-		if(isset($_POST[$user_id])) {
-			$username = $_POST[$user_id];
+	public function upload_avatar($permission_id, $avatar) {
+		if($_SERVER['REQUEST_METHOD'] !== 'POST') {
+			http_response_code(403);
+			exit(json_encode(['state' => -1]));
 		}
+
+		if(!isset($_POST['username'])) {
+			http_response_code(403);
+			exit(json_encode(['state' => 'Tài khoản không tồn tại']));	
+		}
+
+		$array_info = null;
+		$username = $_POST['username'];
+		$user_id = $permission_id == 1 ? 'student_id' : 'teacher_id';
 
 		if( !isset($_FILES['image']) ) {
-			return ['state' => 'file_not_found'];
-			exit();
+			exit(json_encode(['state' => 'File không tồn tại']));
 		}
 		
 		$temp_name = $_FILES['image']['tmp_name'];
@@ -143,69 +149,56 @@ class Account extends Controller {
 		$extension = end($type);
 		$allowed = ['png', 'jpg', 'jpeg'];
 
+
 		if( !in_array($extension, $allowed) ) {
-			return ['state' => 'not_match_ext'];
+			exit(json_encode(['state' => 'not_match_ext']));
 		}
 
 		if( !($file_size <= 500000) )  {
-			return ['state' => 'file_is_too_large'];
+			exit(json_encode(['state' => 'Dung lượng file quá lớn']));
 		}
 
 		// kiem tra file ton tai
 		$file = '../public/images/' . $avatar;
 		$is_exist = file_exists($file);
-
 		if($is_exist) {
 			$del_success = unlink($file);
 			if(!$del_success) {
-				exit(json_encode(['state' => 'Xoa that bai!']));
+				exit(json_encode(['state' => -1]));
 			}
 		}
 
+
+		if($permission_id == 1) {
+			$array_info = ['students', 'student_id', 'student_avatar'];
+		} else {
+			$array_info = ['teachers', 'teacher_id', 'teacher_avatar'];
+		}
+
+		// bat dau upload
 		$uniqid = uniqid($username . '-', false);
 		$path = '../public/images/' . $uniqid . '.' . $extension;
-
 		$is_upload_success = move_uploaded_file($temp_name, $path);
-
+		
 		if($is_upload_success) {
-			
-			if($permission_id == 1) {
-				$array_info = ['students', 'student_id', 'student_avatar'];
-			} else {
-				$array_info = ['teachers', 'teacher_id', 'teacher_avatar'];
-			}
-
 			$avatar_name = $uniqid . '.' . $extension;
 			
 			$is_update_avatar = $this->avatar_filename($username, $avatar_name, $array_info);
 
-			return $is_update_avatar ? ['state' => 'upload_success', 'filename' => $avatar_name] : ['state' => 'upload_failed'];
+			if($is_upload_success) {
+				$result = ['state' => 'upload_success', 'filename' => $avatar_name];
+				exit(json_encode($result));
+			}
+			$result = ['state' => 'upload_failed'];
+			exit(json_encode($result));
 		}
 		return ['state' => 'upload_failed'];
 	}
 
+
 	private function avatar_filename($username, $avatar_name, $array_info) {
 		$account = $this->model('AccountModel');
 		return $account->update_avatar_filename($username, $avatar_name, $array_info);
-	}
-
-
-	// col = 1 | 2
-	public function avatar_user($username = null, $permission = null) {
-		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$array_info = null;
-
-			$account = $this->model('AccountModel');
-			
-			if($permission == 2) {
-				$array_info = ['teachers', 'teacher_id', 'teacher_avatar'];
-			} else {
-				$array_info = ['students', 'student_id', 'student_avatar'];
-			}
-
-			$data = $account->get_avatar_user($username, $array_info);
-			exit( json_encode($data) );
-		}
 	}
 
 

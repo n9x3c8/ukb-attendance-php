@@ -52,29 +52,14 @@ class DB
 		return $this->_connection->query($sql);
 	}
 
-	// public function update($table, $data, $where)
-	// {
-	// 	$this->connect();
-
-	// 	$field_list = '';
-	// 	foreach ($data as $key => $value) {
-	// 		$field_list .= "$key = " . $this->_connection->real_escape_string($value) . ", ";
-	// 	}
-	// 	$field_list = trim($field_list, ', ');
-	// 	$sql = "UPDATE $table SET $field_list WHERE $where ;";
-	// 	return $this->_connection->query($sql);
-	// }
-
 	public function update($table, $data, $where)
 	{
 		$this->connect();
-
 		$field_list = '';
 		foreach ($data as $key => $value) {
 			$field_list .= "$key = '" . $this->_connection->real_escape_string($value) . "', ";
 		}
 		$field_list = trim($field_list, ', ');
-
 		$sql = "UPDATE $table SET $field_list WHERE $where ;";
 		return $this->_connection->query($sql);
 	}
