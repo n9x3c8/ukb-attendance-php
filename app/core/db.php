@@ -64,7 +64,6 @@ class DB
 		return $this->_connection->query($sql);
 	}
 
-
 	public function delete($table, $where = null)
 	{
 		$sql = '';

@@ -33,42 +33,6 @@ class Attendance extends Controller {
 		echo json_encode($state); // 1 or 0
 	}
 
-	// kiem tra xem  giang vien da bat diem danh hay chua
-	// public function state_turn_on_attendance($class_id = null, $subject_id = null, $teacher_id = null, $day = null) {
-	// 	if($class_id !== null && $subject_id !== null && $teacher_id !== null && $day !== null) {
-	// 		$attendance = $this->model('AttendanceModel');
-	// 		$data = $attendance->get_state_turn_on_attendance($class_id, $subject_id, $teacher_id, $day);
-	// 		exit(json_encode($data));
-	// 	}
-	// 	exit(json_encode(['state' => -1]));
-	// }
-
-
-	// lay thong tin chi tiet diem danh
-	public function info_details_attendance_student($student_id = null, $current_date = null, $uuid = null) {
-		$this->verify($student_id, $uuid);
-
-		if($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$attendance = $this->model('AttendanceModel');
-			$data = $attendance->get_info_details_attendance($student_id,  $current_date);
-			echo json_encode($data);
-			exit();
-		}
-		exit( json_encode(['state' => -1]) );
-	}
-
-	//lay ra datetime server
-	// public function datetime_attendance_last($class_id = null, $subject_id = null, $teacher_id = null, $day = null) {
-
-	// 	if( $class_id !== null && $subject_id !== null && $teacher_id !== null && $day != null) {
-	// 		$attendance = $this->model('AttendanceModel');
-	// 		$data = $attendance->get_datetime_attendance_last($class_id, $subject_id, $teacher_id, $day);
-	// 		exit( json_encode($data) );
-	// 	}
-	// 	exit( json_encode(['state' => -1]) );
-	// }
-
-
 	// kiem tra id sv da diem trong attendance student 
 	public function exist_in_attendance_student($student_id = null, $uuid = null) {
 		$this->verify($student_id, $uuid);
@@ -82,6 +46,39 @@ class Attendance extends Controller {
 		exit( json_encode(['state' => -1]) );
 	}
 
+	// kiem tra xem hien tai gv bat diem danh hay chua
+	public function check_turn_on_at($student_id = null, $subject_id = null, $current_date = null, $uuid = null) {
+		$this->verify($student_id, $uuid);
+
+		$attendance = $this->model('AttendanceModel');
+		$data = $attendance->get_check_turn_on_at($student_id, $subject_id, $current_date);
+		exit(json_encode($data));
+	}
+
+	public function exist_class_in_at($teacher_id = null, $class_id = null, $datetime_start = null, $datetime_end = null, $uuid = null) {
+		$this->verify($teacher_id, $uuid);
+
+		$attendance = $this->model('AttendanceModel');
+		$data = $attendance->get_exist_class_in_at($class_id, $datetime_start, $datetime_end);
+
+		if($data !== -1) {
+			exit(json_encode($data));
+		}
+		exit(json_encode(['state' => -1]));
+	}
+
+	// lay thong tin chi tiet diem danh
+	public function info_details_attendance_student($student_id = null, $current_date = null, $uuid = null) {
+		$this->verify($student_id, $uuid);
+
+		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			$attendance = $this->model('AttendanceModel');
+			$data = $attendance->get_info_details_attendance($student_id,  $current_date);
+			echo json_encode($data);
+			exit();
+		}
+		exit( json_encode(['state' => -1]) );
+	}
 
 	// sinh vien diem danh - cap nhat state bang attendance_student = 1
 	public function state_attendance_student($student_id = null, $uuid = null) {
@@ -150,11 +147,12 @@ class Attendance extends Controller {
 	private function verify($username = null, $uuid = null) {
 		$verify = $this->model('VerifyModel');
 		$data = $verify->get_key_security($username);
+
 		if(!$data) {
 			exit(json_encode(['state' => -403]));
 		}
 		
-		if($data['id'] !== $username || $data['uuid'] !== $uuid) {
+		if(strtolower($data['id']) !== strtolower($username) || $data['uuid'] !== $uuid) {
 			exit(json_encode(['state' => -403]));
 		}
 	}

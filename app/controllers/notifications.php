@@ -12,7 +12,7 @@ class Notifications extends Controller {
 		}
 	}
 
-	public function check_seen_notification($username = null, $uuid = null, $list_leave_id = null ) {
+	public function check_seen_notification($username = null, $list_leave_id = null, $uuid = null ) {
 		if($_SERVER['REQUEST_METHOD'] = 'GET') {
 			$this->verify($username, $uuid);
 			
@@ -25,11 +25,12 @@ class Notifications extends Controller {
 	private function verify($username = null, $uuid = null) {
 		$verify = $this->model('VerifyModel');
 		$data = $verify->get_key_security($username);
+
 		if(!$data) {
 			exit(json_encode(['state' => -403]));
 		}
 		
-		if($data['id'] !== $username || $data['uuid'] !== $uuid) {
+		if(strtolower($data['id']) !== strtolower($username) || $data['uuid'] !== $uuid) {
 			exit(json_encode(['state' => -403]));
 		}
 	}

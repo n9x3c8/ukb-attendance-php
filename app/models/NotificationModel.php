@@ -24,9 +24,9 @@ class NotificationModel extends DB {
 	}
 
 	public function get_check_seen_notification($list_leave_id) {
-		$data = ['is_seen' => 1];
-		$result = $this->update('list_leave', $data, "list_leave_id = {$list_leave_id}" );
-		// UPDATE list_leave SET is_seen = 1 WHERE list_leave_id = 1;
+		$this->connect();
+		$sql = "UPDATE list_leave SET is_seen = 1 WHERE list_leave_id = {$list_leave_id};";
+		$result = $this->_connection->query($sql);
 		return $result ? ['state' => 1] : ['state' => -1];
 	}
 

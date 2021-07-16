@@ -75,6 +75,15 @@ class AttendanceModel extends DB {
 		return $this->get_data($sql);
 	}
 
+	public function get_check_turn_on_at($student_id, $subject_id, $current_date) {
+		$sql = "SELECT IF (EXISTS (SELECT A.attendance_id FROM attendances AS A, students AS S
+		WHERE A.subject_id = '{$subject_id}'
+		AND DATE_FORMAT(A.attendance_time, '%Y%m%d') = '{$current_date}'
+		AND S.student_id = '{$student_id}'
+		AND S.class_id = A.class_id), 1, 0) AS state;";
+		return $this->get_data($sql)[0];
+	}
+
 
 	// public function get_state_turn_on_attendance($class_id, $subject_id, $teacher_id, $day) {
 	// 	$sql = " SELECT ( IF( EXISTS(SELECT attendance_id FROM attendances WHERE class_id = '{$class_id}' ";
@@ -134,13 +143,13 @@ class AttendanceModel extends DB {
 		$subject_id = $data[0]['subject_id'];
 		$teacher_id = $data[0]['teacher_id'];
 
-		$sql = "SELECT B1.subject_name,B1.total_session, B1.teacher_name, B1.learn_session, B2.leave_session, B1.latitude, B1.longitude, B1.radius
+		$sql = "SELECT B1.date, B1.subject_id, B1.subject_name, B1.class_id, B1.total_session, B1.teacher_name, B1.learn_session, B2.leave_session, B1.latitude, B1.longitude, B1.radius
 		FROM
-		(SELECT  SB.subject_id, SB.subject_name, IF(SB.subject_credit = 3, 12, 8) total_session, T.teacher_name, COUNT(A.attendance_id) AS learn_session, A.latitude, A.longitude, A.radius
+		(SELECT DATE_FORMAT(A.attendance_time, '%d/%m/%Y') as date, A.class_id, SB.subject_id, SB.subject_name, IF(SB.subject_credit = 3, 12, 8) total_session, T.teacher_name, COUNT(A.attendance_id) AS learn_session, A.latitude, A.longitude, A.radius
 		FROM attendances A, subjects SB, teachers T
 		WHERE  A.teacher_id = '{$teacher_id}'
 		AND A.teacher_id = T.teacher_id
-        AND A.subject_id = '{$subject_id}'        
+		AND A.subject_id = '{$subject_id}'        
 		AND A.subject_id = SB.subject_id ) B1
 		LEFT JOIN
 		(SELECT COUNT(LL.list_leave_id) leave_session,
@@ -253,5 +262,14 @@ class AttendanceModel extends DB {
 		return ['state' => -1];
 	}
 
+
+	public function get_exist_class_in_at($class_id, $datetime_start, $datetime_end) {
+		$sql = "SELECT A.teacher_id, T.teacher_name, T.teacher_numphone FROM attendances AS A, teachers AS T
+		WHERE A.teacher_id = T.teacher_id
+		AND A.class_id = '{$class_id}'
+		AND A.attendance_time BETWEEN '{$datetime_start}' AND '{$datetime_end}';";
+		$data = $this->get_data($sql);
+		return count($data) !== 0 ? $data : -1;
+	}
 
 }

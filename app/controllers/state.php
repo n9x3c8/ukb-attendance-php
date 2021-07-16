@@ -26,11 +26,12 @@ class State extends Controller {
 	private function verify($username = null, $uuid = null) {
 		$verify = $this->model('VerifyModel');
 		$data = $verify->get_key_security($username);
+
 		if(!$data) {
 			exit(json_encode(['state' => -403]));
 		}
 		
-		if($data['id'] !== $username || $data['uuid'] !== $uuid) {
+		if(strtolower($data['id']) !== strtolower($username) || $data['uuid'] !== $uuid) {
 			exit(json_encode(['state' => -403]));
 		}
 	}

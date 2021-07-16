@@ -1,7 +1,7 @@
 <?php
 class Home  extends Controller{
 	public function index() {
-		$pw = 'password123';
+		$pw = 123;
 		echo $hash = password_hash($pw, PASSWORD_DEFAULT);
 	}
 }
